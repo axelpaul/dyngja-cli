@@ -1,3 +1,26 @@
+# Bun / Node
+node_modules/
+bun.lockb
+
+# Build outputs
+/dyngja
+dist/
+
+# Local credentials and configuration
+.env
+.env.local
+.dyngja/
+
+# Local binary and download artifacts
 *.apk
 *.xapk
+xapk_extracted/
+base_apk/
+decompiled/
 
+# Editor / OS
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*.swo
