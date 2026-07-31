@@ -1,0 +1,14 @@
+{
+  "name": "dyngja-cli",
+  "version": "0.1.0",
+  "description": "A Bun CLI for Dyngja's virtual Icelandic-market investing API",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "dyngja": "src/cli.ts"
+  },
+  "scripts": {
+    "dyngja": "bun run src/cli.ts",
+    "check": "bun build --target=bun src/cli.ts --outdir=.build"
+  }
+}
