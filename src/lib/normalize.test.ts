@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { normalizeTransactions, normalizeUser } from "./normalize.ts";
+import { normalizeStocks, normalizeTransactions, normalizeUser } from "./normalize.ts";
 
 describe("normalize", () => {
 	test("normalizes the current user and virtual account", () => {
@@ -35,5 +35,16 @@ describe("normalize", () => {
 		expect(result.count).toBe(1);
 		expect(result.transactions[0]?.ticker).toBe("MAREL");
 		expect(result.transactions[0]?.units).toBe(3);
+	});
+
+	test("normalizes current market stock fields", () => {
+		const result = normalizeStocks([
+			{ id: 7, symbol: "MAREL", company: { name: "Marel hf." }, current_rate: "92.5" },
+		]);
+
+		expect(result).toEqual({
+			count: 1,
+			stocks: [{ id: 7, ticker: "MAREL", name: "Marel hf.", price: 92.5, stockType: 7 }],
+		});
 	});
 });

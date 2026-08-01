@@ -5,6 +5,13 @@ export const DEFAULT_BASE_URL = "https://dyngja.reynirf.com";
 export type HttpMethod = "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
 export type QueryParams = Record<string, QueryValue>;
 
+export interface MarketTransactionRequest {
+	units: number;
+	symbol: string;
+	type: "buy" | "sell";
+	business_account_id: string | number;
+}
+
 export interface RequestOptions {
 	method?: HttpMethod;
 	body?: unknown;
@@ -131,8 +138,8 @@ export class DyngjaClient {
 		return this.request("/auth/re-send/", { method: "POST", auth: false, body: { email } });
 	}
 
-	getApiRoot() {
-		return this.request<JsonObject>("/api/v3/", { auth: false });
+	getApiRoot(version: "v1" | "v3" = "v1") {
+		return this.request<JsonObject>(`/api/${version}/`, { auth: false });
 	}
 
 	getAppInfo(): Promise<AppInfo> {
@@ -191,7 +198,11 @@ export class DyngjaClient {
 	}
 
 	getStocks(query?: QueryParams) {
-		return this.request("/api/v3/stocks/", { query });
+		return this.request("/api/v1/stocks/", { query });
+	}
+
+	createMarketTransaction(body: MarketTransactionRequest) {
+		return this.request("/api/v1/transactions/", { method: "POST", body });
 	}
 
 	getBusinessAccount() {

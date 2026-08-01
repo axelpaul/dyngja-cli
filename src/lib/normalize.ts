@@ -40,6 +40,7 @@ function collection(value: unknown, keys: string[]): unknown[] {
 	const envelope = record(value);
 	for (const key of keys) if (Array.isArray(envelope[key])) return envelope[key] as unknown[];
 	if (Array.isArray(envelope.results)) return envelope.results;
+	if (Array.isArray(envelope.data)) return envelope.data;
 	return [];
 }
 
@@ -59,10 +60,11 @@ export function normalizeAccount(value: unknown): BusinessAccountSummary {
 export function normalizeUser(value: unknown): UserSummary {
 	const envelope = record(value);
 	const user = record(envelope.user ?? value);
-	const accounts = Array.isArray(user.main_business_account)
-		? user.main_business_account
-		: Array.isArray(user.mainBusinessAccount)
-			? user.mainBusinessAccount
+	const rawAccounts = first(user.main_business_account, user.mainBusinessAccount);
+	const accounts = Array.isArray(rawAccounts)
+		? rawAccounts
+		: rawAccounts !== null && typeof rawAccounts === "object"
+			? [rawAccounts]
 			: [];
 	const firstAccount = accounts[0];
 	const firstName = stringValue(first(user.first_name, user.firstName));
@@ -143,11 +145,34 @@ export function normalizeOwnerships(value: unknown): OwnershipList {
 
 export function normalizeStock(value: unknown): StockSummary {
 	const stock = record(value);
+	const company = record(stock.company ?? stock.issuer);
 	return {
 		id: typeof stock.id === "number" || typeof stock.id === "string" ? stock.id : null,
-		ticker: stringValue(first(stock.ticker, stock.symbol, stock.code)),
-		name: stringValue(first(stock.name, stock.company_name, stock.companyName)),
-		price: numberValue(first(stock.price, stock.rate, stock.current_price)),
+		ticker: stringValue(
+			first(stock.ticker, stock.symbol, stock.stock_symbol, stock.stockSymbol, stock.code),
+		),
+		name: stringValue(
+			first(
+				stock.name,
+				stock.company_name,
+				stock.companyName,
+				stock.title,
+				company.name,
+				company.title,
+			),
+		),
+		price: numberValue(
+			first(
+				stock.price,
+				stock.rate,
+				stock.current_price,
+				stock.currentPrice,
+				stock.current_rate,
+				stock.currentRate,
+				stock.last_price,
+				stock.lastPrice,
+			),
+		),
 		stockType: first(stock.stock_type, stock.stockType, stock.id) as string | number | null,
 	};
 }

@@ -42,11 +42,14 @@ dyngja market stocks --json
 dyngja portfolio --json
 dyngja transactions --count 20 --json
 
-dyngja buy  --stock-type MAREL --units 10 --rate 92.50 --yes
-dyngja sell --stock-type MAREL --units 3  --rate 101.00 --yes
+dyngja buy  --ticker MAREL --units 10 --yes
+dyngja sell --ticker MAREL --units 3  --yes
 ```
 
-`buy` and `sell` require `--yes`. Preview an order without sending it with `--dry-run`.
+`buy` and `sell` send market orders using the signed-in account’s business account. Add
+`--business-account-id <id>` to select a different virtual account. They require `--yes`;
+preview an order without sending it with `--dry-run`. An optional `--rate` is used only to
+show a local estimate in a dry run.
 
 ## App features
 
@@ -67,7 +70,7 @@ For an endpoint that does not yet have a convenience command:
 
 ```sh
 dyngja api /api/v3/ownerships/ --json
-dyngja api /api/v3/transactions/ --method POST --data '{"rate":92.5,"stock_type":"MAREL","units":10}' --yes
+dyngja api /api/v1/transactions/ --method POST --data '{"units":10,"symbol":"MAREL","type":"buy","business_account_id":"<account-id>"}' --yes
 ```
 
 ## Output
@@ -90,4 +93,4 @@ bun test
 bun run build
 ```
 
-Dyngja balances and trades are virtual and use the app's simulated market.
+Dyngja balances and trades are virtual and use the app’s simulated market.

@@ -51,4 +51,33 @@ describe("api client", () => {
 			),
 		).rejects.toMatchObject({ status: 400, details: { type: "MARKET_CLOSED" } });
 	});
+
+	test("uses the current v1 market routes and payload", async () => {
+		const requests: Array<{ url: string; init: RequestInit }> = [];
+		globalThis.fetch = Object.assign(
+			async (input: string | URL | Request, init: RequestInit | undefined) => {
+				requests.push({ url: String(input), init: init ?? {} });
+				return new Response(JSON.stringify({ ok: true }), { status: 200 });
+			},
+			{ preconnect: originalFetch.preconnect },
+		);
+
+		const client = new DyngjaClient({ baseUrl: "https://example.test", token: "secret" });
+		await client.getStocks();
+		await client.createMarketTransaction({
+			units: 3,
+			symbol: "MAREL",
+			type: "buy",
+			business_account_id: "account-1",
+		});
+
+		expect(requests[0]?.url).toBe("https://example.test/api/v1/stocks/");
+		expect(requests[1]?.url).toBe("https://example.test/api/v1/transactions/");
+		expect(JSON.parse(String(requests[1]?.init.body))).toEqual({
+			units: 3,
+			symbol: "MAREL",
+			type: "buy",
+			business_account_id: "account-1",
+		});
+	});
 });

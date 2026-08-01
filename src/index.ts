@@ -161,18 +161,20 @@ async function main(): Promise<void> {
 				...flags,
 				action: command,
 				stockType: value("stock-type"),
-				ticker: value("ticker"),
+				ticker: value("ticker") ?? value("symbol"),
 				units: value("units"),
 				rate: value("rate"),
+				businessAccountId: value("business-account-id"),
 			});
 		case "trade":
 			return tradeCommand({
 				...flags,
 				action: parsed.positionals[1],
 				stockType: value("stock-type"),
-				ticker: value("ticker"),
+				ticker: value("ticker") ?? value("symbol"),
 				units: value("units"),
 				rate: value("rate"),
+				businessAccountId: value("business-account-id"),
 			});
 		case "transactions":
 			return transactionsCommand({ count: value("count"), ...flags });

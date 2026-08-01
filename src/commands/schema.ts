@@ -38,7 +38,12 @@ const schemas: Record<string, CommandSchema> = {
 		mutates: true,
 		shape: {
 			action: "buy | sell",
-			request: { rate: "number", stock_type: "string | number", units: "number" },
+			request: {
+				units: "number",
+				symbol: "string",
+				type: "buy | sell",
+				business_account_id: "string | number",
+			},
 			response: "object",
 		},
 	},
@@ -70,7 +75,7 @@ export async function schemaCommand(flags: {
 		else {
 			console.log(color.bold("Schemas available:"));
 			for (const name of Object.keys(schemas)) console.log(`  ${name}`);
-			console.log(`\n${color.dim("Run `dyngja schema <command> --json` for a response shape.")}`);
+			console.log(`\n${color.dim("Run dyngja schema <command> --json for a response shape.")}`);
 		}
 		return;
 	}
