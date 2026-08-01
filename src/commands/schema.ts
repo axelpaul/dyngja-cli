@@ -3,6 +3,7 @@ import { color, die, isJsonMode, printJson } from "../lib/output.ts";
 interface CommandSchema {
 	command: string;
 	requiresAuth: boolean;
+	mutates: boolean;
 	shape: unknown;
 }
 
@@ -10,47 +11,47 @@ const schemas: Record<string, CommandSchema> = {
 	whoami: {
 		command: "whoami",
 		requiresAuth: true,
+		mutates: false,
+		shape: { id: "number | null", email: "string | null", mainAccount: "object | null" },
+	},
+	portfolio: {
+		command: "portfolio",
+		requiresAuth: true,
+		mutates: false,
 		shape: {
-			id: "number | null",
-			username: "string | null",
-			email: "string | null",
-			name: "string | null",
-			mainAccount: {
-				id: "string | null",
-				balance: "number | null",
-				initialBalance: "number | null",
-				contestId: "string | null",
-				transactionCount: "number | null",
-			},
+			count: "number",
+			ownerships: [{ ticker: "string | null", units: "number | null", value: "number | null" }],
+		},
+	},
+	transactions: {
+		command: "transactions",
+		requiresAuth: true,
+		mutates: false,
+		shape: {
+			count: "number",
+			transactions: [{ type: "string | null", ticker: "string | null", units: "number | null" }],
+		},
+	},
+	trade: {
+		command: "buy|sell",
+		requiresAuth: true,
+		mutates: true,
+		shape: {
+			action: "buy | sell",
+			request: { rate: "number", stock_type: "string | number", units: "number" },
+			response: "object",
 		},
 	},
 	info: {
 		command: "info",
 		requiresAuth: false,
+		mutates: false,
 		shape: { delayed_data: "boolean | null", sale_commission: "number | null" },
-	},
-	transactions: {
-		command: "transactions",
-		requiresAuth: true,
-		shape: {
-			count: "number",
-			transactions: [
-				{
-					id: "string | number | null",
-					type: "string | null",
-					ticker: "string | null",
-					units: "number | null",
-					rate: "number | null",
-					amount: "number | null",
-					commission: "number | null",
-					date: "string | null",
-				},
-			],
-		},
 	},
 	doctor: {
 		command: "doctor",
 		requiresAuth: false,
+		mutates: false,
 		shape: {
 			status: "'ok' | 'warn' | 'fail'",
 			checks: [{ name: "string", status: "string", detail: "string" }],
@@ -83,6 +84,7 @@ export async function schemaCommand(flags: {
 	}
 	console.log(color.bold(`dyngja ${schema.command}`));
 	console.log(`  ${color.dim("requires_auth")} ${schema.requiresAuth}`);
+	console.log(`  ${color.dim("mutates")}       ${schema.mutates}`);
 	console.log(`\n${color.dim("Shape:")}`);
 	console.log(JSON.stringify(schema.shape, null, 2));
 }

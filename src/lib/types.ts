@@ -1,7 +1,16 @@
+export type JsonObject = Record<string, unknown>;
+
+export type QueryValue = string | number | boolean | null | undefined;
+
 export interface OutputFlags {
 	json?: boolean;
 	pretty?: boolean;
 	raw?: boolean;
+}
+
+export interface CommandFlags extends OutputFlags {
+	yes?: boolean;
+	dryRun?: boolean;
 }
 
 export interface UserSummary {
@@ -39,16 +48,48 @@ export interface TransactionSummary {
 	id: string | number | null;
 	type: string | null;
 	ticker: string | null;
+	stockType: string | number | null;
 	units: number | null;
 	rate: number | null;
 	amount: number | null;
 	commission: number | null;
+	connection: string | null;
 	date: string | null;
 }
 
 export interface TransactionList {
 	count: number;
 	transactions: TransactionSummary[];
+}
+
+export interface OwnershipSummary {
+	id: string | number | null;
+	ticker: string | null;
+	stockType: string | number | null;
+	units: number | null;
+	averageRate: number | null;
+	marketRate: number | null;
+	value: number | null;
+	profit: number | null;
+	businessAccountId: string | null;
+}
+
+export interface OwnershipList {
+	count: number;
+	ownerships: OwnershipSummary[];
+}
+
+export interface StockSummary {
+	id: string | number | null;
+	ticker: string | null;
+	name: string | null;
+	price: number | null;
+	stockType: string | number | null;
+}
+
+export interface StockList {
+	count: number;
+	stocks: StockSummary[];
 }
 
 export interface LoginResponse {

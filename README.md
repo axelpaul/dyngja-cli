@@ -1,57 +1,73 @@
 # dyngja-cli
 
-Headless CLI for [Dyngja](https://dyngja.app/) — the Icelandic virtual investing app. Check your account, inspect activity, and give an AI agent a predictable interface to the simulated market without opening the mobile app.
+Use [Dyngja](https://dyngja.app/) from your terminal. The CLI exposes the virtual Icelandic market, portfolio, trades, account activity, contests, education, social features, and a direct API escape hatch for automation and AI agents.
 
-Built with [Bun](https://bun.sh/). JSON is a first-class output mode, and the local session is stored with restrictive permissions.
+Built with [Bun](https://bun.sh/). JSON output is the default for piped commands, and sessions are stored locally with restrictive permissions.
 
 ## Install
 
-Needs Bun ≥ 1.3.
+Requires Bun ≥ 1.3.
 
 ```sh
 git clone https://github.com/axelpaul/dyngja-cli.git
 cd dyngja-cli
 bun install
-bun link                 # exposes `dyngja` on your PATH
+bun link
 dyngja login
 ```
 
-Or run without linking:
+Run without linking with `bun src/index.ts <command>`.
+
+## Sign in
 
 ```sh
-bun src/index.ts <command>
-```
-
-## Auth
-
-```sh
-dyngja login                         # prompts for email and password
-dyngja login --email you@example.com # prompts only for the password
+dyngja login
 dyngja whoami
 dyngja logout
 ```
 
-For CI and agents, use environment variables instead of putting secrets in shell history:
+For CI and agents:
 
 ```sh
 DYNGJA_USER=you@example.com DYNGJA_PW='your-password' dyngja login
 ```
 
-The session is cached at `~/.config/dyngja/auth.json` with mode `0600`. Run `dyngja doctor` if authentication or connectivity needs checking.
+The session is cached at `~/.config/dyngja/auth.json` with mode `0600`. Use `dyngja doctor` to check connectivity and authentication.
 
-## Commands
+## Trade and portfolio
+
+```sh
+dyngja market info --json
+dyngja market stocks --json
+dyngja portfolio --json
+dyngja transactions --count 20 --json
+
+dyngja buy  --stock-type MAREL --units 10 --rate 92.50 --yes
+dyngja sell --stock-type MAREL --units 3  --rate 101.00 --yes
+```
+
+`buy` and `sell` require `--yes`. Preview an order without sending it with `--dry-run`.
+
+## App features
 
 ```text
-dyngja login                         sign in and cache a session
-dyngja logout                        clear the local session
-dyngja whoami                        show the signed-in account
-dyngja info                          show current app settings
-dyngja transactions [--count N]      list account activity
-dyngja register --email <e>          create an account
-dyngja confirm --email <e> --code N  confirm an account
-dyngja doctor                        check auth and API health
-dyngja schema [command]              show an agent-facing response shape
-dyngja version                       print the CLI version
+dyngja profile show|update|notifications|feedback|message|picture
+dyngja account show|business-account|patch-business-account|device-token|reset
+dyngja history recent|sales|purchases|buy|sell|historic|total|yesterday
+dyngja contests list|random|search|get|join|join-pin|leave|team-join|invites
+dyngja users search|most-followed|most-profited|news-feed|follow|unfollow
+dyngja education chapters|progress|update|achievements|videos
+dyngja analytics contest-ownerships|position
+dyngja ads
+```
+
+Every state-changing command requires `--yes` and accepts `--dry-run`. Use `--data '{"field":"value"}'` when an app action needs a payload that is not covered by a convenience flag.
+
+For an endpoint that does not yet have a convenience command:
+
+```sh
+dyngja api /api/v3/ownerships/ --json
+dyngja api /api/v3/transactions/ --method POST --data '{"rate":92.5,"stock_type":"MAREL","units":10}' --yes
 ```
 
 ## Output
@@ -59,18 +75,12 @@ dyngja version                       print the CLI version
 | Flag | Meaning |
 |---|---|
 | `--json` | Machine-readable output. |
-| `--pretty` | Force human-readable output even when piped. |
-| `--raw` | Return the underlying API response for data commands. |
+| `--pretty` | Force human-readable output when piped. |
+| `--raw` | Return the underlying API response. |
+| `--yes` | Confirm a state-changing request. |
+| `--dry-run` | Show a state-changing request without sending it. |
 
-When stdout is piped, commands automatically emit JSON unless `--pretty` is supplied.
-
-```sh
-dyngja transactions --count 10 --json
-dyngja whoami --json | jq '.email'
-dyngja schema transactions --json
-```
-
-Exit codes are stable for automation: `0` success, `1` runtime/API error, `2` authentication required or rejected, and `64` invalid usage.
+Exit codes: `0` success, `1` runtime/API error, `2` authentication required or rejected, and `64` invalid usage.
 
 ## Development
 
@@ -80,4 +90,4 @@ bun test
 bun run build
 ```
 
-Dyngja accounts and balances in this project are virtual. This CLI does not connect to a brokerage or place real-money trades.
+Dyngja balances and trades are virtual and use the app's simulated market.
