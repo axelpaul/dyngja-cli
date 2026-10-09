@@ -69,6 +69,7 @@ const commands: CommandSpec[] = [
 	{ name: "resend", description: "Send a new confirmation code." },
 	{ name: "doctor", description: "Check API reachability and session health." },
 	{ name: "schema", description: "Show an agent-facing response shape." },
+	{ name: "serve", description: "Start the local read-only MCP server over stdio." },
 	{ name: "version", description: "Print the CLI version." },
 ];
 
@@ -123,6 +124,11 @@ async function main(): Promise<void> {
 	if (hasFlag(parsed, "version") || command === "version") {
 		if (flags.json) console.log(JSON.stringify({ name: pkg.name, version: VERSION }));
 		else console.log(`dyngja ${VERSION}`);
+		return;
+	}
+	if (command === "serve") {
+		const { serve } = await import("./mcp/server.ts");
+		await serve();
 		return;
 	}
 
