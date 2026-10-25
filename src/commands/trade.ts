@@ -1,8 +1,8 @@
 import { positiveNumber, requireMutationConfirmation } from "../lib/command.ts";
 import { money } from "../lib/format.ts";
-import { normalizeUser } from "../lib/normalize.ts";
 import { die, isJsonMode, printJson } from "../lib/output.ts";
 import { authedClient } from "../lib/session.ts";
+import { MissingBusinessAccountError, placeMarketOrder } from "../lib/trade.ts";
 import type { CommandFlags } from "../lib/types.ts";
 
 export async function tradeCommand(
@@ -42,15 +42,20 @@ export async function tradeCommand(
 	}
 	requireMutationConfirmation(flags, action === "buy" ? "Buying" : "Selling", json);
 	const client = authedClient(json);
-	let businessAccountId = flags.businessAccountId;
-	if (!businessAccountId) {
-		const user = normalizeUser(await client.getMe());
-		businessAccountId = user.mainAccount?.id ?? undefined;
+	let order: Awaited<ReturnType<typeof placeMarketOrder>>;
+	try {
+		order = await placeMarketOrder(client, {
+			type: tradeType,
+			symbol: stockInput,
+			units,
+			businessAccountId: flags.businessAccountId,
+		});
+	} catch (error) {
+		if (error instanceof MissingBusinessAccountError)
+			die("Dyngja did not return a business account. Provide --business-account-id.", 64, json);
+		throw error;
 	}
-	if (!businessAccountId)
-		die("Dyngja did not return a business account. Provide --business-account-id.", 64, json);
-	const request = { ...payload, business_account_id: businessAccountId };
-	const response = await client.createMarketTransaction(request);
+	const { request, response } = order;
 	if (json || flags.raw) {
 		printJson(flags.raw ? response : { action, request, response });
 		return;

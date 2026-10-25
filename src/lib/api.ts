@@ -12,6 +12,38 @@ export interface MarketTransactionRequest {
 	business_account_id: string | number;
 }
 
+/** POST routes for contest actions, as used by the Android app. */
+export const CONTEST_ACTION_PATHS = {
+	join: "/api/v3/contests/",
+	"join-pin": "/api/v3/contests/join/",
+	leave: "/api/v3/contests/",
+	"team-join": "/api/v3/contests/jointeam/",
+	"accept-invite": "/api/v3/contests/",
+	"delete-invite": "/api/v3/contests/",
+} as const;
+export type ContestAction = keyof typeof CONTEST_ACTION_PATHS;
+
+/** POST routes for profile messages and uploads. */
+export const PROFILE_POST_PATHS = {
+	feedback: "/api/v3/feedback/",
+	message: "/api/v3/message/",
+	picture: "/api/v3/upload_image/",
+} as const;
+export type ProfilePostKind = keyof typeof PROFILE_POST_PATHS;
+
+/** POST routes for account-level actions. */
+export const ACCOUNT_ACTION_PATHS = {
+	"patch-business-account": "/api/v3/users/self/business_account_patch/",
+	"device-token": "/api/v3/users/self/push_token/",
+	reset: "/api/v3/users/self/reset_account/",
+} as const;
+export type AccountAction = keyof typeof ACCOUNT_ACTION_PATHS;
+
+export const FOLLOW_PATHS = {
+	follow: "/api/v3/follow/",
+	unfollow: "/api/v3/unfollow/",
+} as const;
+
 export interface RequestOptions {
 	method?: HttpMethod;
 	body?: unknown;
@@ -304,8 +336,27 @@ export class DyngjaClient {
 		return this.getHistory("/api/v3/contests/participants/", query);
 	}
 
-	contestAction(path: string, body: unknown) {
-		return this.request(path, { method: "POST", body });
+	contestAction(action: ContestAction, body: unknown) {
+		return this.request(CONTEST_ACTION_PATHS[action], { method: "POST", body });
+	}
+
+	followAction(action: keyof typeof FOLLOW_PATHS, body: unknown) {
+		return this.request(FOLLOW_PATHS[action], { method: "POST", body });
+	}
+
+	profilePost(kind: ProfilePostKind, body: unknown) {
+		return this.request(PROFILE_POST_PATHS[kind], { method: "POST", body });
+	}
+
+	accountAction(action: AccountAction, body: unknown) {
+		return this.request(ACCOUNT_ACTION_PATHS[action], { method: "POST", body });
+	}
+
+	updateEducationalProgress(body: unknown) {
+		return this.request("/api/v3/users/self/update_educational_progress/", {
+			method: "POST",
+			body,
+		});
 	}
 
 	getUsersByQuery(query: string) {
@@ -342,10 +393,6 @@ export class DyngjaClient {
 
 	getVideos(query?: QueryParams) {
 		return this.getHistory("/api/v3/videos/", query);
-	}
-
-	postSelf(path: string, body: unknown) {
-		return this.request(path, { method: "POST", body });
 	}
 
 	getInvites() {

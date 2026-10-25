@@ -2,6 +2,7 @@ import { printData, textFlag } from "../lib/command.ts";
 import { money } from "../lib/format.ts";
 import { normalizeOwnerships } from "../lib/normalize.ts";
 import { isJsonMode } from "../lib/output.ts";
+import { fetchPortfolio } from "../lib/queries.ts";
 import { authedClient } from "../lib/session.ts";
 import type { CommandFlags } from "../lib/types.ts";
 
@@ -15,14 +16,13 @@ export async function portfolioCommand(
 	},
 ): Promise<void> {
 	const json = isJsonMode(flags);
-	const query = {
-		...(textFlag(flags, "accountId") ? { business_account_id: textFlag(flags, "accountId") } : {}),
-		...(textFlag(flags, "userId") ? { user_id: textFlag(flags, "userId") } : {}),
-		...(textFlag(flags, "contestId") ? { contest_id: textFlag(flags, "contestId") } : {}),
-		...(textFlag(flags, "count") ? { count: textFlag(flags, "count") } : {}),
-		...(textFlag(flags, "sort") ? { sortType: textFlag(flags, "sort") } : {}),
-	};
-	const raw = await authedClient(json).getOwnerships(query);
+	const raw = await fetchPortfolio(authedClient(json), {
+		businessAccountId: textFlag(flags, "account-id") ?? textFlag(flags, "business-account-id"),
+		userId: textFlag(flags, "user-id"),
+		contestId: textFlag(flags, "contest-id"),
+		count: textFlag(flags, "count"),
+		sort: textFlag(flags, "sort"),
+	});
 	if (flags.raw) {
 		printData(raw, flags);
 		return;
