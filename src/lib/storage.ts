@@ -11,9 +11,12 @@ import { homedir } from "node:os";
 import { join } from "node:path";
 import type { AuthState, UserConfig } from "./types.ts";
 
-const configDir = process.env.DYNGJA_CONFIG_DIR ?? join(homedir(), ".config", "dyngja");
+const xdgConfigHome = process.env.XDG_CONFIG_HOME || join(homedir(), ".config");
+const configDir = process.env.DYNGJA_CONFIG_DIR ?? join(xdgConfigHome, "dyngja-cli");
 const authPath = join(configDir, "auth.json");
 const configPath = join(configDir, "config.json");
+// Releases up to 0.2.0 stored state in ~/.config/dyngja; read it if nothing newer exists.
+const legacyDir = process.env.DYNGJA_CONFIG_DIR ? null : join(homedir(), ".config", "dyngja");
 
 function ensureDir(): void {
 	if (!existsSync(configDir)) mkdirSync(configDir, { recursive: true, mode: 0o700 });
@@ -41,15 +44,24 @@ export function saveAuth(state: AuthState): void {
 }
 
 export function loadAuth(): AuthState | null {
-	return readJson<AuthState>(authPath);
+	return (
+		readJson<AuthState>(authPath) ??
+		(legacyDir ? readJson<AuthState>(join(legacyDir, "auth.json")) : null)
+	);
 }
 
 export function clearAuth(): void {
 	if (existsSync(authPath)) unlinkSync(authPath);
+	const legacyAuth = legacyDir ? join(legacyDir, "auth.json") : null;
+	if (legacyAuth && existsSync(legacyAuth)) unlinkSync(legacyAuth);
 }
 
 export function loadConfig(): UserConfig {
-	return readJson<UserConfig>(configPath) ?? {};
+	return (
+		readJson<UserConfig>(configPath) ??
+		(legacyDir ? readJson<UserConfig>(join(legacyDir, "config.json")) : null) ??
+		{}
+	);
 }
 
 export const paths = { configDir, auth: authPath, config: configPath };
