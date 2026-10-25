@@ -5,8 +5,7 @@ import { loadAuth, loadConfig } from "./storage.ts";
 /** Client for the saved session. Throws AuthError (never exits) when there is no session. */
 export function sessionClient(): DyngjaClient {
 	const auth = loadAuth();
-	if (!auth?.token)
-		throw new AuthError({ detail: 'Not logged in. Run "dyngja login" in a terminal first.' });
+	if (!auth?.token) throw new AuthError({ detail: "Not logged in." });
 	return new DyngjaClient({ baseUrl: loadConfig().baseUrl, token: auth.token });
 }
 
