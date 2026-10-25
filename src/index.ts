@@ -69,7 +69,10 @@ const commands: CommandSpec[] = [
 	{ name: "resend", description: "Send a new confirmation code." },
 	{ name: "doctor", description: "Check API reachability and session health." },
 	{ name: "schema", description: "Show an agent-facing response shape." },
-	{ name: "serve", description: "Start the local read-only MCP server over stdio." },
+	{
+		name: "serve",
+		description: "Start the MCP server over stdio (writes need DYNGJA_MCP_ENABLE_WRITES=1).",
+	},
 	{ name: "version", description: "Print the CLI version." },
 ];
 
@@ -117,13 +120,13 @@ async function main(): Promise<void> {
 	const parsed = parseArgs();
 	const command = parsed.positionals[0];
 	const flags = commonFlags(parsed);
-	if (!command || command === "help" || hasFlag(parsed, "help")) {
-		printHelp();
-		return;
-	}
 	if (hasFlag(parsed, "version") || command === "version") {
 		if (flags.json) console.log(JSON.stringify({ name: pkg.name, version: VERSION }));
 		else console.log(`dyngja ${VERSION}`);
+		return;
+	}
+	if (!command || command === "help" || hasFlag(parsed, "help")) {
+		printHelp();
 		return;
 	}
 	if (command === "serve") {

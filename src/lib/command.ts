@@ -1,13 +1,20 @@
 import { die, isJsonMode, printJson } from "./output.ts";
 import type { CommandFlags, JsonObject } from "./types.ts";
 
+/** Look up a flag by its CLI name (`business-account-id`) or camelCase key (`businessAccountId`). */
+function flagEntry(flags: object, name: string): unknown {
+	const record = flags as Record<string, unknown>;
+	if (record[name] !== undefined) return record[name];
+	return record[name.replace(/-([a-z])/g, (_, character: string) => character.toUpperCase())];
+}
+
 export function textFlag(flags: object, name: string): string | undefined {
-	const value = (flags as Record<string, unknown>)[name];
+	const value = flagEntry(flags, name);
 	return typeof value === "string" && value.length > 0 ? value : undefined;
 }
 
 export function booleanFlag(flags: object, name: string, json: boolean): boolean | undefined {
-	const value = (flags as Record<string, unknown>)[name];
+	const value = flagEntry(flags, name);
 	if (value === undefined) return undefined;
 	if (typeof value === "boolean") return value;
 	if (typeof value !== "string") die(`--${name} must be true or false.`, 64, json);
