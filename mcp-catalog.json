@@ -1,0 +1,177 @@
+{
+  "$schema": "https://mcp.axelpaul.is/catalog.schema.json",
+  "id": "dyngja",
+  "repo": "axelpaul/dyngja-cli",
+  "name": "Dyngja",
+  "service": "Dyngja",
+  "serviceUrl": "https://dyngja.app/",
+  "tagline": "Your portfolio and simulated share trades in Dyngja",
+  "description": "Dyngja lets you practise trading Icelandic shares with virtual money. Check share prices, your portfolio and past trades, and follow contests and other users. You can also buy and sell virtual shares if you enable changes.",
+  "examples": [
+    "How has my Dyngja portfolio performed today?",
+    "Buy 10 shares of Marel with virtual money.",
+    "Which users have the most followers?"
+  ],
+  "category": "Finance",
+  "keywords": [
+    "hlutabréf",
+    "stocks",
+    "kauphöll",
+    "investing"
+  ],
+  "auth": "email+password",
+  "binaries": true,
+  "tools": [
+    {
+      "name": "market_info",
+      "write": false,
+      "description": "App settings: delayed market data and sale commission (no login)."
+    },
+    {
+      "name": "ads",
+      "write": false,
+      "description": "Current in-app advertisements (no login)."
+    },
+    {
+      "name": "whoami",
+      "write": false,
+      "description": "Signed-in user and main business account with balance."
+    },
+    {
+      "name": "business_account",
+      "write": false,
+      "description": "Raw details of the signed-in business account."
+    },
+    {
+      "name": "stocks",
+      "write": false,
+      "description": "Tradable stocks with ticker, name and price."
+    },
+    {
+      "name": "portfolio",
+      "write": false,
+      "description": "Virtual holdings, optionally for another account, user or contest."
+    },
+    {
+      "name": "transactions",
+      "write": false,
+      "description": "Recent virtual buy/sell transactions."
+    },
+    {
+      "name": "history",
+      "write": false,
+      "description": "Activity and performance feeds (recent, sales, purchases, historic, totals)."
+    },
+    {
+      "name": "contests",
+      "write": false,
+      "description": "List, search and inspect contests, participants and invites."
+    },
+    {
+      "name": "users",
+      "write": false,
+      "description": "Search users, most followed/profited, news feed, team statistics."
+    },
+    {
+      "name": "education",
+      "write": false,
+      "description": "Chapters, progress, achievements and videos."
+    },
+    {
+      "name": "contest_ownership_totals",
+      "write": false,
+      "description": "Aggregated holdings across business accounts in a contest."
+    },
+    {
+      "name": "contest_position",
+      "write": false,
+      "description": "A user's position in a contest."
+    },
+    {
+      "name": "trade",
+      "write": true,
+      "description": "Buy or sell at market on the simulated market."
+    },
+    {
+      "name": "follow_user",
+      "write": true,
+      "description": "Follow or unfollow a user."
+    },
+    {
+      "name": "join_contest",
+      "write": true,
+      "description": "Join a contest by PIN or join a contest team."
+    },
+    {
+      "name": "update_education_progress",
+      "write": true,
+      "description": "Record education progress for a chapter."
+    },
+    {
+      "name": "update_profile",
+      "write": true,
+      "description": "Change display name and notification/search settings."
+    },
+    {
+      "name": "send_feedback",
+      "write": true,
+      "description": "Send feedback or a message to the Dyngja team."
+    },
+    {
+      "name": "patch_business_account",
+      "write": true,
+      "description": "Change fields on your business account."
+    },
+    {
+      "name": "reset_account",
+      "write": true,
+      "description": "Reset your virtual account (cannot be undone)."
+    }
+  ],
+  "commands": [
+    "dyngja login",
+    "dyngja whoami",
+    "dyngja market stocks",
+    "dyngja portfolio",
+    "dyngja transactions --count 20",
+    "dyngja buy --ticker MAREL --units 10 --yes",
+    "dyngja sell --ticker MAREL --units 3 --yes",
+    "dyngja history recent",
+    "dyngja contests list",
+    "dyngja users search --query jon",
+    "dyngja education chapters",
+    "dyngja serve"
+  ],
+  "envVars": [
+    {
+      "name": "DYNGJA_USER",
+      "description": "Email for non-interactive login (alias DYNGJA_EMAIL)."
+    },
+    {
+      "name": "DYNGJA_PW",
+      "description": "Password for non-interactive login (alias DYNGJA_PASSWORD)."
+    },
+    {
+      "name": "DYNGJA_MCP_ENABLE_WRITES",
+      "description": "Set to 1 to expose write tools in the MCP server."
+    },
+    {
+      "name": "DYNGJA_CONFIG_DIR",
+      "description": "Override the config directory (default $XDG_CONFIG_HOME/dyngja-cli)."
+    },
+    {
+      "name": "DYNGJA_API_URL",
+      "description": "Override the API base URL."
+    }
+  ],
+  "writesEnvVar": "DYNGJA_MCP_ENABLE_WRITES",
+  "is": {
+    "tagline": "Eignasafn og hlutabréfaviðskipti með sýndarpeninga í Dyngju",
+    "description": "Í Dyngju geturðu æft þig í hlutabréfaviðskiptum með sýndarpeninga. Skoðaðu gengi bréfa, eignasafnið þitt og fyrri viðskipti, fylgstu með keppnum og öðrum notendum. Þú getur líka keypt og selt sýndarhlutabréf ef þú leyfir breytingar.",
+    "examples": [
+      "Hvernig hefur eignasafnið mitt í Dyngju þróast í dag?",
+      "Keyptu 10 hluti í Marel fyrir sýndarpeninga.",
+      "Hvaða notendur eru með flesta fylgjendur?"
+    ]
+  }
+}
