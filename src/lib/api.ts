@@ -41,6 +41,14 @@ function withQuery(path: string, query?: QueryParams): string {
 	return `${path}${path.includes("?") ? "&" : "?"}${params.toString()}`;
 }
 
+function filterTransactionsByType(data: unknown, type: "buy" | "sell"): unknown {
+	if (!Array.isArray(data)) return data;
+	return data.filter(
+		(item) =>
+			item !== null && typeof item === "object" && (item as Record<string, unknown>).type === type,
+	);
+}
+
 export class ApiError extends Error {
 	readonly status: number;
 	readonly details: unknown;
@@ -224,60 +232,63 @@ export class DyngjaClient {
 	}
 
 	getRecentTransactions(count?: number) {
-		return this.getHistory("/api/v3/recent/", count === undefined ? undefined : { count });
+		// The old /recent/ feed was removed from the live API.  The v3
+		// transactions endpoint is the authoritative replacement.
+		return this.getTransactions(count);
 	}
 
 	getRecentTransactionsByBusinessAccountId(businessAccountId: string, count?: number) {
-		return this.getHistory("/api/v3/recent/", {
+		return this.getTransactions({
 			business_account_id: businessAccountId,
 			...(count === undefined ? {} : { count }),
 		});
 	}
 
-	getRecentMultiple(kind: "buy" | "sell", count?: number) {
-		return this.getHistory(
-			`/api/v3/recent_multiple_lazy_${kind}_new/`,
-			count === undefined ? undefined : { count },
+	async getRecentMultiple(kind: "buy" | "sell", count?: number) {
+		return filterTransactionsByType(await this.getTransactions(count), kind);
+	}
+
+	async getSalesLazy(count?: number) {
+		return filterTransactionsByType(await this.getTransactions(count), "sell");
+	}
+
+	async getPurchasesLazy(count?: number) {
+		return filterTransactionsByType(await this.getTransactions(count), "buy");
+	}
+
+	async getSalesLazyFromId(id: string | number, count?: number) {
+		return filterTransactionsByType(
+			await this.getTransactions({
+				business_account_id: id,
+				...(count === undefined ? {} : { count }),
+			}),
+			"sell",
 		);
 	}
 
-	getSalesLazy(count?: number) {
-		return this.getHistory("/api/v3/sales_lazy/", count === undefined ? undefined : { count });
-	}
-
-	getPurchasesLazy(count?: number) {
-		return this.getHistory("/api/v3/purchases_lazy/", count === undefined ? undefined : { count });
-	}
-
-	getSalesLazyFromId(id: string | number, count?: number) {
-		return this.getHistory(
-			`/api/v3/sales_lazy/${encodeURIComponent(String(id))}/`,
-			count === undefined ? undefined : { count },
-		);
-	}
-
-	getPurchasesLazyFromId(id: string | number, count?: number) {
-		return this.getHistory(
-			`/api/v3/purchases_lazy/${encodeURIComponent(String(id))}/`,
-			count === undefined ? undefined : { count },
+	async getPurchasesLazyFromId(id: string | number, count?: number) {
+		return filterTransactionsByType(
+			await this.getTransactions({
+				business_account_id: id,
+				...(count === undefined ? {} : { count }),
+			}),
+			"buy",
 		);
 	}
 
 	getHistoricData(type?: string, stockType?: string) {
-		return this.getHistory("/api/v3/historic-data/", {
+		return this.getHistory("/api/v1/historic-data/", {
 			...(type ? { type } : {}),
 			...(stockType ? { stockType } : {}),
 		});
 	}
 
 	getTotalHistoryData(type?: string) {
-		return this.getHistory("/api/v3/total-history-data/", type ? { type } : undefined);
+		return this.getHistory("/api/v1/total-history-data/", type ? { type } : undefined);
 	}
 
 	getYesterdaysTotal(businessAccountId?: string) {
-		const path = businessAccountId
-			? "/api/v3/yesterdays_total/"
-			: "/api/v3/users/self/yesterdays_total/";
+		const path = "/api/v1/users/self/yesterdays_total/";
 		return this.getHistory(
 			path,
 			businessAccountId ? { business_account_id: businessAccountId } : undefined,

@@ -117,20 +117,33 @@ export function normalizeTransactions(value: unknown): TransactionList {
 export function normalizeOwnership(value: unknown): OwnershipSummary {
 	const ownership = record(value);
 	const stock = record(ownership.stock ?? ownership.Stock ?? ownership.stock_type);
+	const units = numberValue(
+		first(ownership.units, ownership.units_owned, ownership.quantity, ownership.number_of_units),
+	);
+	const marketRate = numberValue(
+		first(
+			ownership.market_rate,
+			ownership.current_rate,
+			ownership.price,
+			stock.current_rate,
+			stock.price,
+		),
+	);
+	const reportedValue = numberValue(
+		first(ownership.value, ownership.total_value, ownership.market_value),
+	);
 	return {
 		id: typeof ownership.id === "number" || typeof ownership.id === "string" ? ownership.id : null,
 		ticker: stringValue(
 			first(ownership.ticker, ownership.symbol, stock.ticker, stock.symbol, ownership.stock_name),
 		),
 		stockType: first(ownership.stock_type, ownership.stockType, stock.id) as string | number | null,
-		units: numberValue(first(ownership.units, ownership.quantity, ownership.number_of_units)),
+		units,
 		averageRate: numberValue(
 			first(ownership.average_rate, ownership.avg_rate, ownership.averageRate, ownership.rate),
 		),
-		marketRate: numberValue(
-			first(ownership.market_rate, ownership.current_rate, ownership.price, stock.price),
-		),
-		value: numberValue(first(ownership.value, ownership.total_value, ownership.market_value)),
+		marketRate,
+		value: reportedValue ?? (units !== null && marketRate !== null ? units * marketRate : null),
 		profit: numberValue(first(ownership.profit, ownership.return, ownership.gain)),
 		businessAccountId: stringValue(
 			first(ownership.business_account_id, ownership.business_account, ownership.account_id),

@@ -80,4 +80,36 @@ describe("api client", () => {
 			business_account_id: "account-1",
 		});
 	});
+
+	test("uses live transaction and account-total routes for history", async () => {
+		const requests: string[] = [];
+		globalThis.fetch = Object.assign(
+			async (input: string | URL | Request) => {
+				requests.push(String(input));
+				return new Response(
+					JSON.stringify([
+						{ id: "buy-1", type: "buy" },
+						{ id: "sell-1", type: "sell" },
+					]),
+					{ status: 200 },
+				);
+			},
+			{ preconnect: originalFetch.preconnect },
+		);
+
+		const client = new DyngjaClient({ baseUrl: "https://example.test", token: "secret" });
+		expect(await client.getRecentTransactions(2)).toHaveLength(2);
+		expect(await client.getRecentMultiple("buy", 2)).toEqual([{ id: "buy-1", type: "buy" }]);
+		await client.getHistoricData();
+		await client.getTotalHistoryData();
+		await client.getYesterdaysTotal();
+
+		expect(requests).toEqual([
+			"https://example.test/api/v3/transactions/?count=2",
+			"https://example.test/api/v3/transactions/?count=2",
+			"https://example.test/api/v1/historic-data/",
+			"https://example.test/api/v1/total-history-data/",
+			"https://example.test/api/v1/users/self/yesterdays_total/",
+		]);
+	});
 });
