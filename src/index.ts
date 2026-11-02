@@ -115,7 +115,7 @@ function printHelp(): void {
 
 async function main(): Promise<void> {
 	const parsed = parseArgs();
-	const command = parsed.positionals[0];
+	const command = hasFlag(parsed, "version") ? "version" : parsed.positionals[0];
 	const flags = commonFlags(parsed);
 	if (!command || command === "help" || hasFlag(parsed, "help")) {
 		printHelp();

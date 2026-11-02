@@ -1,5 +1,7 @@
 # dyngja-cli
 
+[MCP setup and client configuration](MCP.md)
+
 Use [Dyngja](https://dyngja.app/) from your terminal. The CLI exposes the virtual Icelandic market, portfolio, trades, account activity, contests, education, social features, and a direct API escape hatch for automation and AI agents.
 
 Built with [Bun](https://bun.sh/). JSON output is the default for piped commands, and sessions are stored locally with restrictive permissions.
